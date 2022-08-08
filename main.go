@@ -6,6 +6,7 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/client-go/rest"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	apiserver "k8s.io/kubernetes/cmd/kube-apiserver/app"
@@ -18,13 +19,15 @@ import (
 )
 
 func main() {
-	//Generates all the required certificates
 	cert.Generatecert()
 	s := options.NewServerRunOptions()
 	fs := pflag.NewFlagSet("addflagstest", pflag.ContinueOnError)
 	for _, f := range s.Flags().FlagSets {
 		fs.AddFlagSet(f)
 	}
+	// silence client-go warnings.
+	// kube-apiserver loopback clients should not log self-issued warnings.
+	rest.SetDefaultWarningHandler(rest.NoWarnings{})
 	apiserverargs := Apiserverflags()
 	fs.Parse(apiserverargs)
 	completedOptions, err := apiserver.Complete(s)
@@ -35,7 +38,8 @@ func main() {
 		utilerrors.NewAggregate(errs)
 	}
 	apiserver.Run(completedOptions, genericapiserver.SetupSignalHandler())
-
+	// silence client-go warnings.
+	//sleep some time to let kube-apiserver run
 	time.Sleep(10 * time.Second)
 
 	restclient.SetDefaultWarningHandler(restclient.NoWarnings{})

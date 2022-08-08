@@ -17,10 +17,10 @@ import (
 const (
 	duration365d = time.Hour * 24 * 365
 )
-
+//This will generate certificates for admin,kube-contoller-manager,kube-apiserver and service account 
 func Generatecert() {
 	now := time.Now()
-	// Generate the CA configuration file, certificate, and private key
+	// Generate the CA certificate, and private key
 	ca := &x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
@@ -45,7 +45,6 @@ func Generatecert() {
 		log.Fatalf("Failed to create private and public key")
 	}
 
-	// create the CA
 	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &caPrivKey.PublicKey, caPrivKey)
 	if err != nil {
 		log.Fatalf("Failed to create ca")
@@ -90,7 +89,7 @@ func Generatecert() {
 	Kubeapiservercertsetup(caBytes, caPrivKey)
 	ServiceAccountcertsetup(caBytes, caPrivKey)
 
-	//TODO: Move a directory(/var/lib/kubernetes/) and Move all the certificates to that directory
+	//TODO: Make a directory(/var/lib/kubernetes/) and Move all the certificates to that directory
 }
 
 func admincertsetup(ca []byte, caPrivKey *rsa.PrivateKey) {
