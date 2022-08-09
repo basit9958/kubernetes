@@ -13,13 +13,16 @@ import (
 	"k8s.io/kubernetes/cmd/kube-apiserver/app/options"
 	controllermanager "k8s.io/kubernetes/cmd/kube-controller-manager/app"
 	controllermanageropts "k8s.io/kubernetes/cmd/kube-controller-manager/app/options"
-	"k8s.io/kubernetes/pkg/cert"
-	. "k8s.io/kubernetes/pkg/k8s-flags"
+	. "k8s.io/kubernetes/pkg/Bootstrap/Args-kubernetes"
+	"k8s.io/kubernetes/pkg/Bootstrap/Config"
+	"k8s.io/kubernetes/pkg/Bootstrap/cert"
 	"time"
 )
 
 func main() {
+
 	cert.Generatecert()
+	Config.Getconfigfiles()
 	s := options.NewServerRunOptions()
 	fs := pflag.NewFlagSet("addflagstest", pflag.ContinueOnError)
 	for _, f := range s.Flags().FlagSets {
