@@ -541,6 +541,9 @@ github.com/josharian/intern
 # github.com/json-iterator/go v1.1.12 => github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
 github.com/json-iterator/go
+# github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+## explicit
+github.com/kardianos/osext
 # github.com/karrick/godirwalk v1.16.1 => github.com/karrick/godirwalk v1.16.1
 ## explicit; go 1.13
 github.com/karrick/godirwalk
