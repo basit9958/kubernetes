@@ -225,7 +225,10 @@ func ConfigureServerRunOptions(ccm *KubeControllerManagerOptions, c constants.Cf
 	ccm.SAController.RootCAFile = filepath.Join(c.CertRootDir, constants.CACertName)
 	ccm.SAController.ServiceAccountKeyFile = filepath.Join(c.CertRootDir, "sa.key")
 	ccm.KubeCloudShared.UseServiceAccountCredentials = true
-
+	ccm.Authentication.RequestHeader.UsernameHeaders = []string{"X-Remote-User"}
+	ccm.Authentication.RequestHeader.GroupHeaders = []string{"X-Remote-Group"}
+	ccm.Authentication.RequestHeader.ExtraHeaderPrefixes = []string{"X-Remote-Extra-"}
+	ccm.Authentication.RequestHeader.ClientCAFile = filepath.Join(c.CertRootDir, constants.FrontProxyCACertName)
 	return ccm
 }
 

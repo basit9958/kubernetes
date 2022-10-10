@@ -33,8 +33,10 @@ const (
 	EtcdPeerCertName = "kubernetes.crt"
 	// ServiceAccountKeyName defines service account key name
 	ServiceAccountKeyName = "sa.key"
-	// ServiceAccountCertName defines service account cert name
-	ServiceAccountCertName = "sa.crt"
+	// ServiceAccountKeyFile defines service account key file
+	ServiceAccountKeyFile = "sa.pub"
+	//FrontProxyCACertName defines RequestHeader client-ca-file
+	FrontProxyCACertName = "front-proxy-ca.crt"
 	// DataDirMode is the expected directory permissions for DataDirDefault
 	DataDirMode = 0755
 	// EtcdDataDirMode is the expected directory permissions for EtcdDataDir.

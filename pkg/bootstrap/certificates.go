@@ -149,6 +149,26 @@ func (c *Certificates) Init(ctx context.Context) error {
 		return err
 	})
 
+	eg.Go(func() error {
+		// Front proxy CA
+		if err := c.CertManager.CreateCACertAndKeyFiles("front-proxy-ca", "kubernetes-front-proxy-ca"); err != nil {
+			return err
+		}
+
+		proxyCertPath, proxyCertKey := filepath.Join(c.CfgVars.CertRootDir, "front-proxy-ca.crt"), filepath.Join(c.CfgVars.CertRootDir, "front-proxy-ca.key")
+
+		proxyClientReq := certificate.Request{
+			Name:   "front-proxy-client",
+			CN:     "front-proxy-client",
+			O:      "front-proxy-client",
+			CACert: proxyCertPath,
+			CAKey:  proxyCertKey,
+		}
+		_, err := c.CertManager.CreateCertAndKeyFilesWithCA(proxyClientReq)
+
+		return err
+	})
+
 	return eg.Wait()
 }
 

@@ -148,7 +148,7 @@ func ConfigureServerRunOptions(s *ServerRunOptions, c constants.CfgVars) *Server
 	defaultIp, _ := network.GetDefaultIPV4()
 	AdvertiseAddress := net.ParseIP(defaultIp)
 	var m []string
-	m = []string{"Node", "RBAC"}
+	m = []string{"Webhook", "RBAC"}
 	s.GenericServerRunOptions.AdvertiseAddress = AdvertiseAddress
 	s.AllowPrivileged = true
 	s.MasterCount = 1
@@ -162,7 +162,7 @@ func ConfigureServerRunOptions(s *ServerRunOptions, c constants.CfgVars) *Server
 	s.Etcd.StorageConfig.Transport.KeyFile = filepath.Join(c.CertRootDir, constants.APIServerKeyName)
 	s.Etcd.StorageConfig.Transport.ServerList = []string{"https" + "://" + defaultIp + ":" + "2379"}
 	s.EventTTL = 1
-	s.Authentication.ServiceAccounts.KeyFiles = []string{filepath.Join(c.CertRootDir, constants.ServiceAccountCertName)}
+	s.Authentication.ServiceAccounts.KeyFiles = []string{filepath.Join(c.CertRootDir, constants.ServiceAccountKeyFile)}
 	s.ServiceAccountSigningKeyFile = filepath.Join(c.CertRootDir, constants.ServiceAccountKeyName)
 	s.Authentication.ServiceAccounts.Issuers = []string{"https" + "://kubernetes.default.svc"}
 	s.ServiceClusterIPRanges = "192.30.0.0/24"
