@@ -18,7 +18,10 @@ limitations under the License.
 package options
 
 import (
+	network "k8s.io/kubernetes/pkg/bootstrap/etcd"
+	"k8s.io/kubernetes/pkg/constants"
 	"net"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -139,6 +142,33 @@ func NewServerRunOptions() *ServerRunOptions {
 	s.Etcd.DefaultStorageMediaType = "application/vnd.kubernetes.protobuf"
 
 	return &s
+}
+
+func ConfigureServerRunOptions(s *ServerRunOptions, c constants.CfgVars) *ServerRunOptions {
+	defaultIp, _ := network.GetDefaultIPV4()
+	AdvertiseAddress := net.ParseIP(defaultIp)
+	var m []string
+	m = []string{"Node", "RBAC"}
+	s.GenericServerRunOptions.AdvertiseAddress = AdvertiseAddress
+	s.AllowPrivileged = true
+	s.MasterCount = 1
+	s.Audit.LogOptions.MaxAge = 30
+	s.Audit.LogOptions.MaxBackups = 3
+	s.Authorization.Modes = m
+	s.SecureServing.BindAddress = net.ParseIP("0.0.0.0")
+	s.Authentication.ClientCert.ClientCA = filepath.Join(c.CertRootDir, constants.CACertName)
+	s.Etcd.StorageConfig.Transport.TrustedCAFile = filepath.Join(c.CertRootDir, constants.CACertName)
+	s.Etcd.StorageConfig.Transport.CertFile = filepath.Join(c.CertRootDir, constants.APIServerCertName)
+	s.Etcd.StorageConfig.Transport.KeyFile = filepath.Join(c.CertRootDir, constants.APIServerKeyName)
+	s.Etcd.StorageConfig.Transport.ServerList = []string{"https" + "://" + defaultIp + ":" + "2379"}
+	s.EventTTL = 1
+	s.Authentication.ServiceAccounts.KeyFiles = []string{filepath.Join(c.CertRootDir, constants.ServiceAccountCertName)}
+	s.ServiceAccountSigningKeyFile = filepath.Join(c.CertRootDir, constants.ServiceAccountKeyName)
+	s.Authentication.ServiceAccounts.Issuers = []string{"https" + "://kubernetes.default.svc"}
+	s.ServiceClusterIPRanges = "192.30.0.0/24"
+	s.SecureServing.ServerCert.CertKey.CertFile = filepath.Join(c.CertRootDir, constants.APIServerCertName)
+	s.SecureServing.ServerCert.CertKey.KeyFile = filepath.Join(c.CertRootDir, constants.APIServerKeyName)
+	return s
 }
 
 // Flags returns flags for a specific APIServer by section name

@@ -22,6 +22,7 @@ package app
 import (
 	"crypto/tls"
 	"fmt"
+	"k8s.io/kubernetes/pkg/constants"
 	"net"
 	"net/http"
 	"net/url"
@@ -87,7 +88,7 @@ func init() {
 }
 
 // NewAPIServerCommand creates a *cobra.Command object with default parameters
-func NewAPIServerCommand() *cobra.Command {
+func NewAPIServerCommand(cfg constants.CfgVars) *cobra.Command {
 	s := options.NewServerRunOptions()
 	cmd := &cobra.Command{
 		Use: "kube-apiserver",
@@ -114,7 +115,8 @@ cluster's shared state through which all other components interact.`,
 				return err
 			}
 			cliflag.PrintFlags(fs)
-
+			//Configure required options for kube-apiserver
+			s = options.ConfigureServerRunOptions(s, cfg)
 			// set default options
 			completedOptions, err := Complete(s)
 			if err != nil {

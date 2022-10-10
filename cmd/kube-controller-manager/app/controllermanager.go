@@ -23,6 +23,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"k8s.io/kubernetes/pkg/constants"
 	"math/rand"
 	"net/http"
 	"os"
@@ -97,11 +98,12 @@ const (
 )
 
 // NewControllerManagerCommand creates a *cobra.Command object with default parameters
-func NewControllerManagerCommand() *cobra.Command {
+func NewControllerManagerCommand(cfg constants.CfgVars) *cobra.Command {
 	s, err := options.NewKubeControllerManagerOptions()
 	if err != nil {
 		klog.Fatalf("unable to initialize command options: %v", err)
 	}
+	s = options.ConfigureServerRunOptions(s, cfg)
 
 	cmd := &cobra.Command{
 		Use: "kube-controller-manager",

@@ -20,7 +20,9 @@ package options
 
 import (
 	"fmt"
+	"k8s.io/kubernetes/pkg/constants"
 	"net"
+	"path/filepath"
 
 	v1 "k8s.io/api/core/v1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -207,6 +209,24 @@ func NewKubeControllerManagerOptions() (*KubeControllerManagerOptions, error) {
 	s.Generic.LeaderElection.ResourceNamespace = "kube-system"
 
 	return &s, nil
+}
+
+// ConfigureServerRunOptions returns KubeControllerManagerOptions with required configurations.
+func ConfigureServerRunOptions(ccm *KubeControllerManagerOptions, c constants.CfgVars) *KubeControllerManagerOptions {
+	ccm.SecureServing.BindAddress = net.ParseIP("0.0.0.0")
+	ccm.KubeCloudShared.ClusterName = "local"
+	ccm.CSRSigningController.ClusterSigningCertFile = filepath.Join(c.CertRootDir, constants.CACertName)
+	ccm.CSRSigningController.ClusterSigningKeyFile = filepath.Join(c.CertRootDir, constants.CAKeyName)
+	ccm.Kubeconfig = filepath.Join(c.CertRootDir, "ccm.conf")
+	ccm.Authorization.RemoteKubeConfigFile = filepath.Join(c.CertRootDir, "ccm.conf")
+	ccm.Authentication.RemoteKubeConfigFile = filepath.Join(c.CertRootDir, "ccm.conf")
+	ccm.Generic.LeaderElection.LeaderElect = true
+	ccm.Generic.Controllers = []string{"*", "bootstrapsigner", "tokencleaner"}
+	ccm.SAController.RootCAFile = filepath.Join(c.CertRootDir, constants.CACertName)
+	ccm.SAController.ServiceAccountKeyFile = filepath.Join(c.CertRootDir, "sa.key")
+	ccm.KubeCloudShared.UseServiceAccountCredentials = true
+
+	return ccm
 }
 
 // NewDefaultComponentConfig returns kube-controller manager configuration object.
