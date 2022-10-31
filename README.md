@@ -1,107 +1,42 @@
-# Kubernetes (K8s)
+# PhysicalMachineChaos Artifact
 
-[![GoPkg Widget]][GoPkg] [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/569/badge)](https://bestpractices.coreinfrastructure.org/projects/569)
+## What is PhysicalMachineChaos Artifact?
 
-<img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
+PhysicalMachineChaos-Artifact is an artifact for PhysicalMachineChaos provided by [chaos-mesh](https://github.com/chaos-mesh/chaos-mesh) which is used to simulate the faults of network, disk, pressure, JVM, time, and others in physical or virtual machines.
 
-----
+PhysicalMachineChaos-Artifact consists of three components:
 
-Kubernetes, also known as K8s, is an open source system for managing [containerized applications]
-across multiple hosts. It provides basic mechanisms for deployment, maintenance,
-and scaling of applications.
+- __kube-apiserver__: The Kubernetes API server validates and configures data for the api objects. The API Server services REST operations and provides the frontend to the cluster's shared state through which all other components interact.
 
-Kubernetes builds upon a decade and a half of experience at Google running
-production workloads at scale using a system called [Borg],
-combined with best-of-breed ideas and practices from the community.
+- __kube-controller-manager__: Manages the controllers of kubernetes and integrated chaos-controllers.
 
-Kubernetes is hosted by the Cloud Native Computing Foundation ([CNCF]).
-If your company wants to help shape the evolution of
-technologies that are container-packaged, dynamically scheduled,
-and microservices-oriented, consider joining the CNCF.
-For details about who's involved and how Kubernetes plays a role,
-read the CNCF [announcement].
+- __Etcd server__: Stores the data from kube-apiserver.
 
-----
+- The overall architecture is shown below:
 
-## To start using K8s
+![Arch](./hack/picture/arch.png)
 
-See our documentation on [kubernetes.io].
 
-Try our [interactive tutorial].
-
-Take a free course on [Scalable Microservices with Kubernetes].
-
-To use Kubernetes code as a library in other applications, see the [list of published components](https://git.k8s.io/kubernetes/staging/README.md).
-Use of the `k8s.io/kubernetes` module or `k8s.io/kubernetes/...` packages as libraries is not supported.
-
-## To start developing K8s
-
-The [community repository] hosts all information about
-building Kubernetes from source, how to contribute code
-and documentation, who to contact about what, etc.
-
-If you want to build Kubernetes right away there are two options:
-
-##### You have a working [Go environment].
-
+### Usage :
+* Build and execute the binary from source
+```shell
+$ go build
+$ ./kubernetes.exe
 ```
-mkdir -p $GOPATH/src/k8s.io
-cd $GOPATH/src/k8s.io
-git clone https://github.com/kubernetes/kubernetes
-cd kubernetes
-make
-```
+* Install the CRD into the cluster using: `make install`
+* Start chaos-mesh controllers using:  `make run`
 
-##### You have a working [Docker environment].
+* Create a Namespace:
+    ```yaml
+    # ns1.yaml
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+        name: chaos-mesh
+        labels:
+            managed: "chaos-mesh"
+    ```
+  `kubectl apply -f ns1.yaml` 
 
-```
-git clone https://github.com/kubernetes/kubernetes
-cd kubernetes
-make quick-release
-```
+* Simulate chaos on physical modes by creating object `PhysicalMachineChaos`: `kubectl apply -f example/physicalmachine.yaml`
 
-For the full story, head over to the [developer's documentation].
-
-## Support
-
-If you need support, start with the [troubleshooting guide],
-and work your way through the process that we've outlined.
-
-That said, if you have questions, reach out to us
-[one way or another][communication].
-
-[announcement]: https://cncf.io/news/announcement/2015/07/new-cloud-native-computing-foundation-drive-alignment-among-container
-[Borg]: https://research.google.com/pubs/pub43438.html
-[CNCF]: https://www.cncf.io/about
-[communication]: https://git.k8s.io/community/communication
-[community repository]: https://git.k8s.io/community
-[containerized applications]: https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/
-[developer's documentation]: https://git.k8s.io/community/contributors/devel#readme
-[Docker environment]: https://docs.docker.com/engine
-[Go environment]: https://golang.org/doc/install
-[GoPkg]: https://pkg.go.dev/k8s.io/kubernetes
-[GoPkg Widget]: https://pkg.go.dev/badge/k8s.io/kubernetes.svg
-[interactive tutorial]: https://kubernetes.io/docs/tutorials/kubernetes-basics
-[kubernetes.io]: https://kubernetes.io
-[Scalable Microservices with Kubernetes]: https://www.udacity.com/course/scalable-microservices-with-kubernetes--ud615
-[troubleshooting guide]: https://kubernetes.io/docs/tasks/debug/
-
-## Community Meetings 
-
-The [Calendar](https://www.kubernetes.dev/resources/calendar/) has the list of all the meetings in Kubernetes community in a single location.
-
-## Adopters
-
-The [User Case Studies](https://kubernetes.io/case-studies/) website has real-world use cases of organizations across industries that are deploying/migrating to Kubernetes.
-
-## Governance 
-
-Kubernetes project is governed by a framework of principles, values, policies and processes to help our community and constituents towards our shared goals.
-
-The [Kubernetes Community](https://github.com/kubernetes/community/blob/master/governance.md) is the launching point for learning about how we organize ourselves.
-
-The [Kubernetes Steering community repo](https://github.com/kubernetes/steering) is used by the Kubernetes Steering Committee, which oversees governance of the Kubernetes project.
-
-## Roadmap 
-
-The [Kubernetes Enhancements repo](https://github.com/kubernetes/enhancements) provides information about Kubernetes releases, as well as feature tracking and backlogs.

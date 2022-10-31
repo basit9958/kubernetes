@@ -13,22 +13,22 @@
 // limitations under the License.
 //
 
-package chaosimpl
+package time
 
 import (
-	"go.uber.org/fx"
-	"k8s.io/kubernetes/controllers/chaosimpl/stresschaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/timechaos"
+	"github.com/pkg/errors"
 
-	"k8s.io/kubernetes/controllers/chaosimpl/jvmchaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/physicalmachinechaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
-var AllImpl = fx.Options(
-	stresschaos.Module,
-	jvmchaos.Module,
-	timechaos.Module,
-	physicalmachinechaos.Module,
+const varLength = 8
 
-	utils.Module)
+func (it *FakeImage) SetVarUint64(program *ptrace.TracedProgram, entry *mapreader.Entry, symbol string, value uint64) error {
+	if offset, ok := it.offset[symbol]; ok {
+		err := program.WriteUint64ToAddr(entry.StartAddress+uint64(offset), value)
+		return err
+	}
+
+	return errors.New("symbol not found")
+}

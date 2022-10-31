@@ -13,22 +13,26 @@
 // limitations under the License.
 //
 
-package chaosimpl
+package utils
 
 import (
-	"go.uber.org/fx"
-	"k8s.io/kubernetes/controllers/chaosimpl/stresschaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/timechaos"
+	"testing"
 
-	"k8s.io/kubernetes/controllers/chaosimpl/jvmchaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/physicalmachinechaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/utils"
+	. "github.com/onsi/gomega"
 )
 
-var AllImpl = fx.Options(
-	stresschaos.Module,
-	jvmchaos.Module,
-	timechaos.Module,
-	physicalmachinechaos.Module,
+func TestEncodeClkIds(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-	utils.Module)
+	mask, err := EncodeClkIds([]string{"CLOCK_REALTIME"})
+	g.Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+	g.Expect(mask).Should(Equal(uint64(1)))
+
+	mask, err = EncodeClkIds([]string{"CLOCK_REALTIME", "CLOCK_MONOTONIC"})
+	g.Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+	g.Expect(mask).Should(Equal(uint64(3)))
+
+	mask, err = EncodeClkIds([]string{"CLOCK_MONOTONIC"})
+	g.Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+	g.Expect(mask).Should(Equal(uint64(2)))
+}
