@@ -65,6 +65,9 @@ func preflight(cfg constants.CfgVars, ctx context.Context) error {
 
 //RunApiserverinbackground runs NewAPIServerCommand as a goroutine
 func RunApiserverinbackground(cmd *cobra.Command) {
-	go cli.Run(cmd)
+	go func() {
+		code := cli.Run(cmd)
+		os.Exit(code)
+	}()
 	time.Sleep(10 * time.Second)
 }

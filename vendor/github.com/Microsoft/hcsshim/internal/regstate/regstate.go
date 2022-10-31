@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"syscall"
 
-	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -20,6 +19,7 @@ import (
 const (
 	_REG_OPTION_VOLATILE = 1
 
+	_REG_CREATED_NEW_KEY     = 1
 	_REG_OPENED_EXISTING_KEY = 2
 )
 
@@ -61,8 +61,7 @@ func createVolatileKey(k *Key, path string, access uint32) (newk *Key, openedExi
 		d uint32
 	)
 	fullpath := filepath.Join(k.Name, path)
-	pathPtr, _ := windows.UTF16PtrFromString(path)
-	err = regCreateKeyEx(syscall.Handle(k.Key), pathPtr, 0, nil, _REG_OPTION_VOLATILE, access, nil, &h, &d)
+	err = regCreateKeyEx(syscall.Handle(k.Key), syscall.StringToUTF16Ptr(path), 0, nil, _REG_OPTION_VOLATILE, access, nil, &h, &d)
 	if err != nil {
 		return nil, false, &os.PathError{Op: "RegCreateKeyEx", Path: fullpath, Err: err}
 	}

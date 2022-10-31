@@ -147,14 +147,13 @@ func NewServerRunOptions() *ServerRunOptions {
 func ConfigureServerRunOptions(s *ServerRunOptions, c constants.CfgVars) *ServerRunOptions {
 	defaultIp, _ := network.GetDefaultIPV4()
 	AdvertiseAddress := net.ParseIP(defaultIp)
-	var m []string
-	m = []string{"Webhook", "RBAC"}
 	s.GenericServerRunOptions.AdvertiseAddress = AdvertiseAddress
 	s.AllowPrivileged = true
 	s.MasterCount = 1
 	s.Audit.LogOptions.MaxAge = 30
 	s.Audit.LogOptions.MaxBackups = 3
-	s.Authorization.Modes = m
+	s.Authorization.Modes = []string{"RBAC"}
+	s.Admission.PluginNames = []string{"MutatingAdmissionWebhook", "ValidatingAdmissionWebhook"}
 	s.SecureServing.BindAddress = net.ParseIP("0.0.0.0")
 	s.Authentication.ClientCert.ClientCA = filepath.Join(c.CertRootDir, constants.CACertName)
 	s.Etcd.StorageConfig.Transport.TrustedCAFile = filepath.Join(c.CertRootDir, constants.CACertName)
