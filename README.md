@@ -18,7 +18,7 @@ PhysicalMachineChaos-Artifact consists of three components:
 
 
 ### Usage :
-* Build and execute the binary from source
+* Build and execute the binary from source with root permissions
 ```shell
 $ go build
 $ ./kubernetes.exe
@@ -33,8 +33,6 @@ $ ./kubernetes.exe
     kind: Namespace
     metadata:
         name: chaos-mesh
-        labels:
-            managed: "chaos-mesh"
     ```
   `kubectl apply -f ns1.yaml` 
 

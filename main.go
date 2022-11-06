@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"k8s.io/component-base/cli"
+	chaoscm "k8s.io/kubernetes/cmd/chaos-controller-manager"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
 	ccm "k8s.io/kubernetes/cmd/kube-controller-manager/app"
 	"k8s.io/kubernetes/pkg/bootstrap"
@@ -14,6 +15,7 @@ import (
 	"k8s.io/kubernetes/pkg/constants"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -33,14 +35,23 @@ func main() {
 		os.Exit(1)
 	}
 	cmd := app.NewAPIServerCommand(cfg)
-	RunApiserverinbackground(cmd)
+	RunApiserver(cmd)
 	//sleep some time to let kube-apiserver run
 	ccmcmd := ccm.NewControllerManagerCommand(cfg)
-	code := cli.Run(ccmcmd)
-	os.Exit(code)
+	Runccm(ccmcmd)
+
+	execmd := exec.Command("make", "install")
+	execmd.Stdout = os.Stdout
+	execmd.Stderr = os.Stderr
+	err := execmd.Run()
+	if err != nil {
+		log.Fatalf("installation of CRD failed with %s\n", err)
+	}
+
+	chaoscm.Start()
 }
 
-//preflight make all the required directories and certificates for the binary
+//preflight generate all the required directories and certificates for the binary
 func preflight(cfg constants.CfgVars, ctx context.Context) error {
 	if err := dir.Init(cfg.DataDir, constants.DataDirMode); err != nil {
 		return err
@@ -63,11 +74,20 @@ func preflight(cfg constants.CfgVars, ctx context.Context) error {
 	return nil
 }
 
-//RunApiserverinbackground runs NewAPIServerCommand as a goroutine
-func RunApiserverinbackground(cmd *cobra.Command) {
+//RunApiserver starts kube-apiserver
+func RunApiserver(cmd *cobra.Command) {
 	go func() {
 		code := cli.Run(cmd)
 		os.Exit(code)
 	}()
 	time.Sleep(10 * time.Second)
+}
+
+//Runccm starts kube-controller-manager
+func Runccm(cmd *cobra.Command) {
+	go func() {
+		code := cli.Run(cmd)
+		os.Exit(code)
+	}()
+	time.Sleep(15 * time.Second)
 }

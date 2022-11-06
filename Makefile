@@ -31,7 +31,7 @@ manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Install CRDs into a cluster
-install: manifests
+install:
 	$(KUBECTL_BIN) apply -f manifests/crd.yaml
 
 # Run against the configured Kubernetes cluster in ~/.kube/config

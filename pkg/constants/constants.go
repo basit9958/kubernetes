@@ -9,8 +9,9 @@ import (
 
 // Data directories
 const (
-	DataDirDefault    = "/var/lib/k8s"
-	WinDataDirDefault = "C:\\var\\lib\\k8s" // WinDataDirDefault is the data-dir for windows
+	DataDirDefault     = "/var/lib/k8s"
+	WinDataDirDefault  = "C:\\var\\lib\\k8s" // WinDataDirDefault is the data-dir for windows
+	AdminkubeconfigDir = "/.kube"
 )
 
 var certDir string
@@ -58,12 +59,25 @@ type CfgVars struct {
 	EtcdCertDir         string // EtcdCertDir contains etcd certificates
 	EtcdDataDir         string // EtcdDataDir contains etcd state
 	ManifestsDir        string // location for all stack manifests
-
+	WebhookCertDir      string
 }
 
 // GetConfig returns the pointer to a Config struct
 func GetConfig(dataDir string) CfgVars {
+	dataDir = GetdataDir(dataDir)
 
+	certDir = FormatPath(dataDir, "pki")
+	return CfgVars{
+		AdminKubeConfigPath: AdminkubeconfigDir,
+		BinDir:              FormatPath(dataDir, "bin"),
+		CertRootDir:         certDir,
+		DataDir:             dataDir,
+		EtcdCertDir:         FormatPath(certDir, "etcd"),
+		EtcdDataDir:         FormatPath(dataDir, "etcd"),
+	}
+}
+
+func GetdataDir(dataDir string) string {
 	if dataDir == "" {
 		switch runtime.GOOS {
 		case "windows":
@@ -72,7 +86,6 @@ func GetConfig(dataDir string) CfgVars {
 			dataDir = DataDirDefault
 		}
 	}
-
 	// fetch absolute path for dataDir
 	dataDir, err := filepath.Abs(dataDir)
 	if err != nil {
@@ -82,19 +95,8 @@ func GetConfig(dataDir string) CfgVars {
 	case "windows":
 		dataDir = strings.Trim(dataDir, "C:")
 	}
-
-	certDir = formatPath(dataDir, "pki")
-
-	return CfgVars{
-		AdminKubeConfigPath: formatPath(certDir, "admin.conf"),
-		BinDir:              formatPath(dataDir, "bin"),
-		CertRootDir:         certDir,
-		DataDir:             dataDir,
-		EtcdCertDir:         formatPath(certDir, "etcd"),
-		EtcdDataDir:         formatPath(dataDir, "etcd"),
-	}
+	return dataDir
 }
-
-func formatPath(dir string, file string) string {
+func FormatPath(dir string, file string) string {
 	return fmt.Sprintf("%s/%s", dir, file)
 }

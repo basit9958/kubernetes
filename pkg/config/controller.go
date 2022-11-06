@@ -16,10 +16,10 @@
 package config
 
 import (
+	"k8s.io/kubernetes/pkg/constants"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
-
 	"k8s.io/kubernetes/pkg/webhook/config/watcher"
 )
 
@@ -119,7 +119,24 @@ type ChaosControllerConfig struct {
 
 // EnvironChaosController returns the settings from the environment.
 func EnvironChaosController() (ChaosControllerConfig, error) {
-	cfg := ChaosControllerConfig{}
+	tlsconfig, certDir := GetTLSConfig("")
+	cfg := ChaosControllerConfig{
+		TLSConfig: tlsconfig,
+		CertsDir:  certDir,
+	}
 	err := envconfig.Process("", &cfg)
 	return cfg, err
+}
+
+func GetTLSConfig(dataDir string) (TLSConfig, string) {
+	datadir := constants.GetdataDir(dataDir)
+	certDir := constants.FormatPath(datadir, "pki")
+	return TLSConfig{
+		ChaosMeshCACert:       constants.FormatPath(certDir, "chaos-mesh-ca.crt"),
+		ChaosDaemonClientCert: constants.FormatPath(certDir, "chaos-mesh.chaosd-client.crt"),
+		ChaosDaemonClientKey:  constants.FormatPath(certDir, "chaos-mesh.chaosd-client.key"),
+		ChaosdCACert:          constants.FormatPath(certDir, "chaosd-ca.crt"),
+		ChaosdClientCert:      constants.FormatPath(certDir, "chaos-mesh.chaosd-client.crt"),
+		ChaosdClientKey:       constants.FormatPath(certDir, "chaos-mesh.chaosd-client.key"),
+	}, certDir
 }

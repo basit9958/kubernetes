@@ -17,18 +17,13 @@ package chaosimpl
 
 import (
 	"go.uber.org/fx"
-	"k8s.io/kubernetes/controllers/chaosimpl/stresschaos"
-	"k8s.io/kubernetes/controllers/chaosimpl/timechaos"
-
 	"k8s.io/kubernetes/controllers/chaosimpl/jvmchaos"
 	"k8s.io/kubernetes/controllers/chaosimpl/physicalmachinechaos"
 	"k8s.io/kubernetes/controllers/chaosimpl/utils"
 )
 
 var AllImpl = fx.Options(
-	stresschaos.Module,
 	jvmchaos.Module,
-	timechaos.Module,
 	physicalmachinechaos.Module,
 
 	utils.Module)

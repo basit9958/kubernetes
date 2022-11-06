@@ -168,6 +168,58 @@ func (c *Certificates) Init(ctx context.Context) error {
 
 		return err
 	})
+	//chaos-mesh CA
+	chaosdcaCertPath := filepath.Join(c.CfgVars.CertRootDir, "chaosd-ca.crt")
+	chaosdcaCertKey := filepath.Join(c.CfgVars.CertRootDir, "chaosd-ca.key")
+	webhookcaCertPath := filepath.Join(c.CfgVars.CertRootDir, "webhook-ca.crt")
+	webhookcaCertKey := filepath.Join(c.CfgVars.CertRootDir, "webhook-ca.key")
+
+	if err := c.CertManager.CreateCACertAndKeyFiles("chaos-mesh-ca", "chaos-mesh-ca"); err != nil {
+		return err
+	}
+	if err := c.CertManager.CreateCACertAndKeyFiles("chaosd-ca", "chaosd-ca"); err != nil {
+		return err
+	}
+	if err := c.CertManager.CreateCACertAndKeyFiles("webhook-ca", "chaos-mesh-ca"); err != nil {
+		return err
+	}
+
+	chaoshostnames := []string{
+		"localhost",
+		"controller-manager.chaos-mesh.org",
+	}
+	eg.Go(func() error {
+		// chaosd client cert & key
+		chaosdReq := certificate.Request{
+			Name:      "chaos-mesh.chaosd-client",
+			CN:        "controller-manager.chaos-mesh.org",
+			O:         "controller-manager.chaos-mesh.org",
+			CACert:    chaosdcaCertPath,
+			CAKey:     chaosdcaCertKey,
+			Hostnames: chaoshostnames,
+		}
+		_, err = c.CertManager.CreateCertAndKeyFilesWithCA(chaosdReq)
+		if err != nil {
+			fmt.Printf("", err)
+			return err
+		}
+		return nil
+	})
+
+	eg.Go(func() error {
+		// webhook client cert and key
+		WebhookReq := certificate.Request{
+			Name:   "chaos-mesh-controller-manager.chaos-mesh.svc",
+			CACert: webhookcaCertPath,
+			CAKey:  webhookcaCertKey,
+		}
+		_, err = c.CertManager.CreateCertAndKeyFilesWithCA(WebhookReq)
+		if err != nil {
+			fmt.Printf("", err)
+			return err
+		}
+		return nil
+	})
 
 	return eg.Wait()
 }
